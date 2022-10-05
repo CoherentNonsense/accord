@@ -1,28 +1,23 @@
-use druid::widget::{Align, Flex, Label, Padding, TextBox};
-use druid::{
-    AppLauncher, Data, Env, Lens, LocalizedString, PlatformError, Widget, WidgetExt, WindowDesc,
-};
+mod data;
+mod delegate;
+mod gui;
+mod matrix;
 
-fn build_ui() -> impl Widget<()> {
-    Padding::new(
-        10.0,
-        Flex::row()
-            .with_flex_child(
-                Flex::column()
-                    .with_flex_child(Label::new("top left"), 1.0)
-                    .with_flex_child(Label::new("bottom left"), 1.0),
-                1.0,
-            )
-            .with_flex_child(
-                Flex::column()
-                    .with_flex_child(Label::new("top right"), 1.0)
-                    .with_flex_child(Label::new("top right"), 1.0),
-                1.0,
-            ),
-    )
-}
+use data::AppState;
+use delegate::Delegate;
+use druid::{AppLauncher, WindowDesc};
+use gui::ui_app;
 
-fn main() -> Result<(), PlatformError> {
-    AppLauncher::with_window(WindowDesc::new(build_ui)).launch(())?;
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let state = AppState::default();
+
+    let window = WindowDesc::new(ui_app)
+        .title("Accord")
+        .window_size((600.0, 400.0));
+
+    let launcher = AppLauncher::with_window(window).delegate(Delegate {});
+    launcher.launch(state).expect("Failed to launch app");
+
     Ok(())
 }
